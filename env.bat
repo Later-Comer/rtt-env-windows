@@ -118,6 +118,7 @@ rem if "%ConEmuBaseDir%" == "" (
 rem     %ENV_ROOT%\tools\ConEmu\ConEmu\clink\clink.bat inject
 rem )
 
+cmd /k
 
 goto :eof
 
@@ -144,8 +145,3 @@ if errorlevel 1 (
 
 endlocal & set "PATH=%PATH%"
 goto: eof
-
-
-
-
-cmd /k
