@@ -2,16 +2,16 @@
 :: Do not repeat run
 if not "%ENV_ROOT%" == "" goto end
 
-
-:: ====== RT-Thread ENV Change Code Page ================
-
 chcp 65001 > nul
-rem python %~dp0..\scripts\env.py -v
 echo RT-Thread Env Tool (ConEmu) Version 1.5.2
 echo  ^\ ^| /
 echo - RT -     Thread Operating System
 echo  / ^| ^\
 echo 2006 - 2024 Copyright by RT-Thread team
+
+@REM ==================================================
+@REM check path contain chinese
+@REM ==================================================
 
 
 Setlocal ENABLEDELAYEDEXPANSION
@@ -22,19 +22,19 @@ set env_root=%~dp0
 
 :next
 if not "%str%"=="" (
-set /a num+=1
-if "!str:~0,1!"==" " (
-    echo.
-    echo *******************************************************************
-    echo Env 工具所在路径如下：
-    echo %env_root:~0,-21%
-    echo 警告：以上路径不能包含中文或空格，请将 Env 移动到符合要求的路径中。
-    echo *******************************************************************
-    endlocal
-    goto break_str
-)
-set "str=%str:~1%"
-goto next
+    set /a num+=1
+    if "!str:~0,1!"==" " (
+        echo.
+        echo *******************************************************************
+        echo Env 工具所在路径如下：
+        echo %env_root:~0,-21%
+        echo 警告：以上路径不能包含中文或空格，请将 Env 移动到符合要求的路径中。
+        echo *******************************************************************
+        endlocal
+        goto break_str
+    )
+    set "str=%str:~1%"
+    goto next
 )
 endlocal
 
@@ -55,44 +55,75 @@ set str=
 chcp 437 > nul
 
 
-:: =================== RT-Thread ENV Activate venv ============================
+@REM ==================================================
+@REM activate or create venv
+@REM ==================================================
 
 set RTT_ENV_URL=https://github.com/rt-thread/env
-set VENV_ROOT="%~dp0\.venv"
+set VENV=%~dp0.venv
+set PYTHON=%~dp0program\python\python-3.11.9-amd64\python.exe
 echo.
-if not exist %VENV_ROOT% (
+if not exist %VENV% (
     echo Create Python venv for RT-Thread
-    python -m venv %VENV_ROOT%
-    echo activate rt-thread venv in %VENV_ROOT% 
-    call %VENV_ROOT%\Scripts\activate.bat
-    echo install env from %RTT_ENV_URL%
+    %PYTHON% -m pip uninstall pip -y
+    %PYTHON% -m ensurepip
+    %PYTHON% -m venv %VENV%
+    echo Activate Python VENV in %VENV% 
+    call %VENV%\Scripts\activate.bat
+    echo Install RT-Thread ENV from %RTT_ENV_URL%
     pip install git+%RTT_ENV_URL%
 ) else (
-    echo activate rt-thread venv in %VENV_ROOT%
-    call %VENV_ROOT%\Scripts\activate.bat
+    echo Activate Python VENV in %VENV%
+    call %VENV%\Scripts\activate.bat
 )
 
-
-:: ============= RT-Thread ENV Add Path ==================
+@REM ==================================================
+@REM add toolchain to path
+@REM ==================================================
 
 set ENV_ROOT=%~dp0
-set PYTHONPATH=%ENV_ROOT%\program\python\python-3.11.9-amd64
-set PYTHONHOME=%ENV_ROOT%\program\python\python-3.11.9-amd64
+
+set path="%ENV_ROOT%\program\bin";%path%
+
+@REM python
+@REM set PYTHONPATH=%ENV_ROOT%\program\python\python-3.11.9-amd64
+@REM set PYTHONHOME=%ENV_ROOT%\program\python\python-3.11.9-amd64
+@REM set path="%PYTHONHOME%";%path%
+@REM set path="%PYTHONHOME%\Scripts";%path%
+
+@REM gcc
 set RTT_EXEC_PATH=%ENV_ROOT%\program\gcc\gcc-arm-none-eabi-10.3-2021.10\bin
 set RTT_CC=gcc
-set PKGS_ROOT=%ENV_ROOT%\manifests\packages
-:: Add to %PATH%
-set path="%ENV_ROOT%\program\git\git-2.41.0-32-bit\cmd";%path%
-set path="%ENV_ROOT%\program\bin";%path%
 set path="%RTT_EXEC_PATH%";%path%
-set path="%PYTHONHOME%";%path%
-set path="%PYTHONHOME%\Scripts";%path%
+
+@REM git
+set path="%ENV_ROOT%\program\git\git-2.41.0-32-bit\cmd";%path%
+
+@REM qemu
 set path="%ENV_ROOT%\program\qemu\qemu-w64-8.0.94";%path%
 
-goto end
+@REM fatdisk
+set path="%ENV_ROOT%\program\fatdisk";%path%
+
+@REM pkgs
+set PKGS_INDEX_ROOT=%ENV_ROOT%\manifests
+set PKGS_DIR=%ENV_ROOT%\manifests
+set PKGS_ROOT=%ENV_ROOT%\manifests
+
+@REM sdk
+set SDK_INDEX_ROOT=%ENV_ROOT%\manifests\toolchains
 
 
-:: ============= Add Path Unique ==================
+rem if "%ConEmuBaseDir%" == "" (
+rem     %ENV_ROOT%\tools\ConEmu\ConEmu\clink\clink.bat inject
+rem )
+
+
+goto :eof
+
+@REM ==================================================
+@REM function add path unique
+@REM ==================================================
 
 :: 不重复添加路径到 %PATH% 中
 :AddPath
@@ -112,12 +143,8 @@ if errorlevel 1 (
 )
 
 endlocal & set "PATH=%PATH%"
-goto:eof
+goto: eof
 
-:end
-rem if "%ConEmuBaseDir%" == "" (
-rem     %ENV_ROOT%\tools\ConEmu\ConEmu\clink\clink.bat inject
-rem )
 
 
 

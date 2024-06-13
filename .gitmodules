@@ -1,3 +1,6 @@
 [submodule "manifests/packages"]
 	path = manifests/packages
 	url = https://github.com/RT-Thread/packages
+[submodule "manifests/toolchains"]
+	path = manifests/toolchains
+	url = https://github.com/RT-Thread/sdk
