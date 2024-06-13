@@ -1,6 +1,6 @@
 function  add_windows_terminate() {
-    # npdt的配置
-    $npdt = [PSCustomObject]@{
+    # env的配置
+    $env = [PSCustomObject]@{
         commandline = "`"$env:windir\System32\cmd.exe`" /K `"$PSScriptRoot\init.bat`"";
         guid        = "{c06ccb37-4fca-4609-b969-30aa1b3d8549}";
         hidden      = $false;
@@ -17,11 +17,11 @@ function  add_windows_terminate() {
         # 读取wt的配置文件
         $wt_setting = (Get-Content "$wt_setting_file" -Raw)  | ConvertFrom-Json
 
-        # 移除guid一样的配置，然后将npdt添加到末尾
-        $wt_setting.profiles.list = $wt_setting.profiles.list.where({ $npdt.guid -ne $_.guid }) + $npdt 
+        # 移除guid一样的配置，然后将env添加到末尾
+        $wt_setting.profiles.list = $wt_setting.profiles.list.where({ $env.guid -ne $_.guid }) + $env 
         
-        # 将npdt设置为默认终端
-        $wt_setting.defaultProfile = $npdt.guid
+        # 将env设置为默认终端
+        $wt_setting.defaultProfile = $env.guid
         
         #  将wt配置写入到文件
         $wt_setting | ConvertTo-Json -Depth 10  | Set-Content -Path $wt_setting_file
